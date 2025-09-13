@@ -1,0 +1,65 @@
+## 数据库设计 
+
+用户表：
+
+id（主键）bigint
+
+username 昵称 varchar
+
+userAccount 登录账号
+
+avatarUrl 头像 varchar
+
+gender 性别 tinyint
+
+userPassword 密码 varchar
+
+phone 电话 varchar
+
+email 邮箱 varchar
+
+userStatus 用户状态 int 0 - 正常
+
+------
+
+createTime 创建时间（数据插入时间）datetime
+
+updateTime 更新时间（数据更新时间）datetime
+
+isDelete 是否删除 0 1（逻辑删除）tinyint
+
+## mybatisX插件的使用
+
+若数据库表并不是下划线的字段，并且和实体类一样，那么可以这么设置
+
+![image-20250912205300159](C:\Users\Winston\AppData\Roaming\Typora\typora-user-images\image-20250912205300159.png)
+
+##### 由于我们的数据库表中的字段名和实体类属性都是驼峰命名，那么需要在yml文件中将mybatis-plus默认开启的驼峰命名关闭
+
+## GenerateAllSetter插件的使用
+
+就是在为属性赋值的时候，set方法一键生成
+
+![image-20250912210517075](C:\Users\Winston\AppData\Roaming\Typora\typora-user-images\image-20250912210517075.png)
+
+### 注册逻辑
+
+1.前端用户通过输入账号密码以及校验码
+
+校验账号密码校验密码是否符合要求
+
+​	i 非空，账号不得为空
+
+​	ii 账号长度不得小于4位
+
+​	iii 密码长度不得小于8位
+
+​	iv 账号不得包含特殊字符
+
+​	v 账号不得重复
+
+​	vi 密码与校验密码相同一致
+
+2.对密码进行加密（密码千万不要直接以明文存储到数据库中）
+
+3.向数据库插入用户数据
