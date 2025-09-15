@@ -108,7 +108,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验账号和密码是否合法
         // 非空判断
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            throw new BusinessException("账号或密码为空！");
         }
         // 判断账号长度
         if (userAccount.length() < 4) {
@@ -168,7 +168,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public int userLogout(HttpServletRequest request) {
-        // 移除登陆态
+        // 移除登陆态（session）
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
     }

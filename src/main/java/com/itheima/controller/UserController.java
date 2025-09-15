@@ -115,8 +115,8 @@ public class UserController {
         if (id <= 0) {
             return Result.fail(FAIL, "用户不存在");
         }
-        boolean b = userService.removeById(id);
-        return Result.success(b);
+        boolean result = userService.removeById(id);
+        return Result.success(result);
     }
     /**
      * 用户登出（注销）
