@@ -26,5 +26,10 @@ class UserCenterApplicationTests {
         user.setEmail("1234");
         userService.save(user);
     }
+    @Test
+    void findUser() {
+        User byId = userService.getById(1);
+        System.out.println(byId);
+    }
 
 }

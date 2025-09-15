@@ -1,16 +1,14 @@
 package com.itheima.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.util.Date;
 import lombok.Data;
 
-    /**
-     *
-     * @TableName user
-     */
+/**
+ *
+ * @TableName user
+ */
 @TableName(value ="user")
 @Data
 public class User {
@@ -72,12 +70,18 @@ public class User {
 
         /**
          * 是否删除
+         * 逻辑删除
          */
         @TableLogic
         private Integer isDelete;
 
         /**
-         * 用户权限 0-用户 1-管理员
+         * 用户权限
          */
         private Integer userRole;
-    }
+
+        /**
+         * 星球编号
+         */
+        private String planetCode;
+}
