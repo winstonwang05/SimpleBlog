@@ -28,8 +28,12 @@ class UserCenterApplicationTests {
     }
     @Test
     void findUser() {
-        User byId = userService.getById(1);
-        System.out.println(byId);
+        userService.removeById(1);
+        userService.removeById(2);
+        userService.removeById(3);
+        userService.removeById(4);
+
+
     }
 
 }

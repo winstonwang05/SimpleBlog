@@ -3,7 +3,7 @@ spring:
     name: user-center
 #  mysql Connection
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/usercenter
     username: root
     password: 123456
@@ -25,3 +25,7 @@ mybatis-plus:
         logic-delete-field: isDelete # 全局逻辑删除字段名(deleted为实体类属性名称)
         logic-delete-value: 1 # 逻辑已删除值。可选，默认值为 1
         logic-not-delete-value: 0 # 逻辑未删除值。可选，默认值为 0
+# 配置全局密钥pepper
+user:
+  password:
+    pepper: "xk8#jF$5mL@9qR!2tZvP*7sW&3yB^6nCdK%4hGg" # 40+字符的随机字符串

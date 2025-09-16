@@ -70,9 +70,8 @@ public class User {
 
         /**
          * 是否删除
-         * 逻辑删除
          */
-        @TableLogic
+        @TableLogic // 逻辑删除
         private Integer isDelete;
 
         /**
@@ -84,4 +83,14 @@ public class User {
          * 星球编号
          */
         private String planetCode;
+
+        /**
+         * 加密后的密码串
+         */
+        private String userPasswordHash;
+
+        /**
+         * 标记当前用的加密算法，便于将来升级
+         */
+        private String userPasswordAlgo;
 }

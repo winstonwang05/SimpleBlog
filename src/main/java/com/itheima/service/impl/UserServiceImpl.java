@@ -30,10 +30,8 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
     @Resource
     private UserMapper userMapper;
-    /**
-     * 盐值，混淆密码
-     */
-    public static final  String SALT = "win";
+    @Resource
+    private PasswordEncoder passwordEncoder;
 
     /**
      *  注册逻辑
@@ -82,7 +80,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userMapper.selectCount(queryWrapperValue) > 0) {
             throw new BusinessException("星球编号已存在！");
         }
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 密码加密（argon2）
+        String encryptPassword = passwordEncoder.hashPassword(userPassword);
         // 向数据库插入用户数据
         User user = new User();
         user.setUserAccount(userAccount);
@@ -125,13 +124,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException("账号包含特殊字符！");
         }
         // 加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         // 从数据库中查询账号密码是否正确,密码与数据库的密文做比较
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
-        queryWrapper.eq("userPassword", encryptPassword);
         User user = userMapper.selectOne(queryWrapper);
-        if (user == null) {
+        // 校验密码
+        if (user == null || !passwordEncoder.verifyPassword(userPassword, user.getUserPassword())) {
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException("账号或密码错误！");
         }

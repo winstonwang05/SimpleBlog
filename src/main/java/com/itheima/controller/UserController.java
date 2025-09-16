@@ -84,40 +84,7 @@ public class UserController {
         //返回脱敏后的用户信息
         return Result.success(safetyUser);
     }
-    /**
-     * 用户查询
-     */
-    @GetMapping("/search")
-    public Result<List<User>> searchUser(String username, HttpServletRequest request) {
-        if (!isAdmin(request)) {
-            return Result.fail(FAIL, "非管理员");
-        }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotBlank(username)) {
-            queryWrapper.like("username", username);
-        }
-        List<User> userList = userService.list(queryWrapper);
-        List<User> collect = userList
-                .stream()
-                .map(user -> userService.getSafetyUser(user))
-                .collect(Collectors.toList());
-        // 返回脱敏后的用户信息
-        return Result.success(collect);
-    }
-    /**
-     *  逻辑删除
-     */
-    @PostMapping("/delete")
-    public Result<Boolean> userDelete(@RequestBody long id, HttpServletRequest request) {
-        if (!isAdmin(request)) {
-            return Result.fail(FAIL, "非管理员");
-        }
-        if (id <= 0) {
-            return Result.fail(FAIL, "用户不存在");
-        }
-        boolean result = userService.removeById(id);
-        return Result.success(result);
-    }
+
     /**
      * 用户登出（注销）
      */
@@ -128,14 +95,6 @@ public class UserController {
         }
         int result = userService.userLogout(request);
         return Result.success(result);
-    }
-    /**
-     *  是否为管理员
-     */
-    private boolean isAdmin(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObj;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
     }
 
 
