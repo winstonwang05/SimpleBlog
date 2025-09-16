@@ -85,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 向数据库插入用户数据
         User user = new User();
         user.setUserAccount(userAccount);
-        user.setUserPassword(encryptPassword);
+        user.setUserPasswordHash(encryptPassword);
         user.setPlanetCode(planetCode);
         boolean result = this.save(user);
         if (!result) {
@@ -129,7 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.eq("userAccount", userAccount);
         User user = userMapper.selectOne(queryWrapper);
         // 校验密码
-        if (user == null || !passwordEncoder.verifyPassword(userPassword, user.getUserPassword())) {
+        if (user == null || !passwordEncoder.verifyPassword(userPassword, user.getUserPasswordHash())) {
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException("账号或密码错误！");
         }

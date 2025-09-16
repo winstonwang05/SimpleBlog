@@ -4,6 +4,7 @@ import java.util.Date;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.itheima.pojo.User;
 import com.itheima.service.UserService;
+import com.itheima.service.impl.PasswordEncoder;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,26 +15,18 @@ import java.util.List;
 class UserCenterApplicationTests {
     @Resource
     private UserService userService;
+    @Resource
+    private PasswordEncoder passwordEncoder;
     @Test
     void contextLoads() {
-        User user = new User();
-        user.setUsername("winston01");
-        user.setUserAccount("1234");
-        user.setAvatarUrl("F:\\image\\5.JPG");
-        user.setGender(0);
-        user.setUserPassword("1234");
-        user.setPhone("1232");
-        user.setEmail("1234");
-        userService.save(user);
-    }
-    @Test
-    void findUser() {
-        userService.removeById(1);
-        userService.removeById(2);
-        userService.removeById(3);
-        userService.removeById(4);
-
+        String rawPassword = "123456";
+        String hash = passwordEncoder.hashPassword(rawPassword);
+        // 判断是否验证成功
+        boolean result = passwordEncoder.verifyPassword(rawPassword, hash);
+        System.out.println(result);
 
     }
+
+
 
 }

@@ -39,11 +39,6 @@ public class User {
         private Integer gender;
 
         /**
-         * 密码
-         */
-        private String userPassword;
-
-        /**
          * 电话
          */
         private String phone;
@@ -70,8 +65,9 @@ public class User {
 
         /**
          * 是否删除
+         * 逻辑删除
          */
-        @TableLogic // 逻辑删除
+        @TableLogic
         private Integer isDelete;
 
         /**
