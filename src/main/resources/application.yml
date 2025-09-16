@@ -13,8 +13,8 @@ spring:
 # port setting
 server:
   port: 8080
-  servlet:
-    context-path: /api
+# servlet:
+#   context-path: /api
 # close camel
 mybatis-plus:
   configuration:

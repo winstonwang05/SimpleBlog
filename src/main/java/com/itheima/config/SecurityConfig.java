@@ -24,9 +24,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(AbstractHttpConfigurer::disable) // 直接禁用CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/register", "/api/user/login").permitAll()
+                        .requestMatchers("/user/register", "/user/login").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
