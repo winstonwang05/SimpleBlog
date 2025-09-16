@@ -2,8 +2,7 @@ package com.itheima.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.itheima.common.Result;
-import com.itheima.common.ResultCode;
+import com.itheima.common.ErrorCode;
 import com.itheima.exception.BusinessException;
 import com.itheima.pojo.User;
 import com.itheima.service.UserService;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,41 +42,41 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
         // 非空判断
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)) {
-            throw new BusinessException("输入为空！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号长度
         if (userAccount.length() < 4) {
-            throw new BusinessException("账号长度不能小于4位！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断登录密码和校验密码长度
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断星球编号是否合规
         if (planetCode.length() > 5) {
-            throw new BusinessException("星球编号不能大于5位！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号是否合规
         String regex = ".*[^a-zA-Z0-9_].*";
         Matcher matcher = Pattern.compile(regex).matcher(userAccount);
         if (matcher.find()) {
-            throw new BusinessException("账号包含特殊字符！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 密码与校验密码一致
         if (!checkPassword.equals(userPassword)) {
-            throw new BusinessException("两次输入密码不一致！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 账号不得重复(唯一性)
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         if (userMapper.selectCount(queryWrapper) > 0) {
-            throw new BusinessException("账号已存在！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 星球编号不能重复（唯一性）
         QueryWrapper<User> queryWrapperValue = new QueryWrapper<>();
         queryWrapperValue.eq("planetCode", planetCode);
         if (userMapper.selectCount(queryWrapperValue) > 0) {
-            throw new BusinessException("星球编号已存在！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 密码加密（argon2）
         String encryptPassword = passwordEncoder.hashPassword(userPassword);
@@ -89,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPlanetCode(planetCode);
         boolean result = this.save(user);
         if (!result) {
-            throw new BusinessException("注册失败!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
         return user.getId();
@@ -107,21 +105,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验账号和密码是否合法
         // 非空判断
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new BusinessException("账号或密码为空！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号长度
         if (userAccount.length() < 4) {
-            throw new BusinessException("账号长度不能小于4位！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断登录密码长度
         if (userPassword.length() < 8) {
-            throw new BusinessException("密码长度不能小于8位！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号是否合规
         String regex = ".*[^a-zA-Z0-9_].*";
         Matcher matcher = Pattern.compile(regex).matcher(userAccount);
         if (matcher.find()) {
-            throw new BusinessException("账号包含特殊字符！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 加密
         // 从数据库中查询账号密码是否正确,密码与数据库的密文做比较
@@ -131,7 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验密码
         if (user == null || !passwordEncoder.verifyPassword(userPassword, user.getUserPasswordHash())) {
             log.info("user login failed, userAccount cannot match userPassword");
-            throw new BusinessException("账号或密码错误！");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User safetyUser = getSafetyUser(user);
         // 保存到session中

@@ -14,7 +14,7 @@ public class PasswordEncoder {
     @Value("${user.password.pepper}")
     private String pepper;
 
-    // 构造方法
+    // 构造方法(对argon2算法)
     public PasswordEncoder(Argon2PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }

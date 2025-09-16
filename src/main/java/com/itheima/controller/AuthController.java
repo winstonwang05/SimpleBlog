@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.itheima.common.ResultCode.FAIL;
+
 import static com.itheima.constant.UserConstant.ADMIN_ROLE;
 import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -21,7 +21,7 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/auth")
-public class AnthController {
+public class AuthController {
 
     @Autowired
     private UserService userService;
@@ -31,7 +31,7 @@ public class AnthController {
     @GetMapping("/search")
     public Result<List<User>> searchUser(String username, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return Result.fail(FAIL, "非管理员");
+            return Result.error(401, "非管理员");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(username)) {
@@ -51,10 +51,10 @@ public class AnthController {
     @PostMapping("/delete")
     public Result<Boolean> userDelete(@RequestBody long id, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return Result.fail(FAIL, "非管理员");
+            return Result.error(401, "非管理员");
         }
         if (id <= 0) {
-            return Result.fail(FAIL, "用户不存在");
+            return Result.error(400, "用户不存在");
         }
         boolean result = userService.removeById(id);
         return Result.success(result);

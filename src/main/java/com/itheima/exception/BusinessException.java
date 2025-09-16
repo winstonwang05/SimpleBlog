@@ -1,31 +1,41 @@
 package com.itheima.exception;
 
-import com.itheima.common.ResultCode;
+import com.itheima.common.ErrorCode;
 import lombok.Getter;
+
+import java.io.Serial;
 
 /**
  * 业务异常类
  */
 @Getter
 public class BusinessException extends RuntimeException {
-    private final Integer code;
+    @Serial
+    private static final long serialVersionUID = -692615954102045667L;
+    // 自定义错误信息
+    private final String message;
+    // 自定义错误码
+    private final int code;
 
     /**
      *
-     * @param message 自定义错误信息
+     * @param errorCode 枚举类错误码
      */
-    public BusinessException(String message) {
-        super(message);
-        this.code = ResultCode.FAIL.getCode();
+    public BusinessException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.message = errorCode.getMessage();
+        this.code = errorCode.getCode();
     }
 
     /**
      *
-     * @param message 自定义错误信息
-     * @param code 自定义状态码
+     * @param code 自定义错误码
+     * @param message 自定义错误信息`
      */
-    public BusinessException(String message, Integer code) {
+    public BusinessException(int code,String message) {
         super(message);
+        this.message = message;
         this.code = code;
     }
+
 }
