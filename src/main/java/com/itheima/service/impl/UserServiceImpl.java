@@ -179,7 +179,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 通过用户名得到当前用户信息，再从数据库中查询用户Role
+     * Jwt过滤器检验有效之后，再通过解析token得到用户的信息（username），设置认证到Spring Security中告知用户权限
      * 得到当前用户权限并封装权限到Spring Security User 对象中，以便在jwt过滤器中设置认证信息添加用户权限（只有封装为Spring Security对象才能设置权限信息）
      * 这样使Spring Security 会过滤掉（拦截）不是管理员的接口
      * @param username 当前用户名

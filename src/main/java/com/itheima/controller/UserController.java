@@ -105,7 +105,7 @@ public class UserController {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
             throw new BusinessException(404, "未登录");
         }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal(); // 认证（Authentication） 和 授权（Authorization）
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userDetails.getUsername());
         User user = userService.getOne(queryWrapper);
