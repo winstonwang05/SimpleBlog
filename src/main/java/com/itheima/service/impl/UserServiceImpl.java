@@ -7,6 +7,7 @@ import com.itheima.exception.BusinessException;
 import com.itheima.pojo.User;
 import com.itheima.service.UserService;
 import com.itheima.mapper.UserMapper;
+import com.itheima.utils.JwtUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserMapper userMapper;
     @Resource
     private PasswordEncoder passwordEncoder;
+
 
     /**
      *  注册逻辑
@@ -139,8 +141,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User safetyUser = getSafetyUser(user);
-        // 保存到session中
-        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+/*        // 保存到session中
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);*/
         // 返回脱敏用户信息给前端
         return safetyUser;
 
