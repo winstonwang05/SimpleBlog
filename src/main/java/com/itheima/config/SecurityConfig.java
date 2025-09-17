@@ -37,11 +37,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // 禁用CSRF
                 .authorizeHttpRequests(auth -> auth
                         // 登录/注册接口，所有人都能访问
-                        .requestMatchers("/user/register", "/user/login").permitAll()
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                         // 管理员接口 -> 只有管理员能访问(角色在后面，理解从后往前看)
-                        .requestMatchers("admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // 普通用户接口 -> 登录即可访问
-                        .requestMatchers("user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
                         // 其他接口，都需要认证
                         .anyRequest().authenticated()
                 )

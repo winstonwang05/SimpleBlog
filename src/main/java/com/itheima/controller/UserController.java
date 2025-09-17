@@ -23,7 +23,7 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
  * @author Winston
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 public class UserController {
     // 注入Jwt工具类
     @Resource
@@ -89,7 +89,7 @@ public class UserController {
     /**
      * 当前用户角色
      */
-    @GetMapping("/current")
+    @GetMapping("/me")
     public Result<User> getCurrentUser() {
 /*        获取会话
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);

@@ -20,7 +20,7 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
  * 管理员接口
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     @Autowired
