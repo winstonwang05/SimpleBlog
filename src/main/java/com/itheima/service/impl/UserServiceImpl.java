@@ -11,8 +11,15 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +32,7 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 */
 @Service
 @Slf4j
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService, UserDetailsService {
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -169,6 +176,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return 1;
     }
 
+    /**
+     * 通过用户名得到当前用户信息，再从数据库中查询用户Role
+     * 得到当前用户权限并封装权限到Spring Security User 对象中，以便在jwt过滤器中设置认证信息添加用户权限（只有封装为Spring Security对象才能设置权限信息）
+     * 这样使Spring Security 会过滤掉（拦截）不是管理员的接口
+     * @param username 当前用户名
+     * @return  返回Spring Security User 对象
+     * @throws UsernameNotFoundException 用户不存在异常
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 查询数据库得到用户信息
+        User user = this.getOne(new QueryWrapper<User>().eq("username", username));
+        if (user == null) {
+            // 用户不存在
+            throw new BusinessException(404, "用户不存在！");
+        }
+        // 将Role信息封装 0-用户 ，1-管理员
+        String roleName = user.getUserRole() == 1 ? "ROLE_ADMIN" : "ROLE_USER";
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
+        // 返回 Spring Security User 对象
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getUserPasswordHash(),
+                authorities
+        );
+    }
 }
 
 

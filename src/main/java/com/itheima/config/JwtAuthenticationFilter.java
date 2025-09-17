@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -26,8 +28,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 注入userService用来查询用户的权限信息
     @Autowired
-    private UserService userService;
-
+    private UserDetailsService userDetailsService;
     // 通过构造方法注入Jwt工具类，用来解析和校验token
     private final JwtUtil jwtUtil;
 
@@ -51,11 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             /**
              *  设置用户权限
              */
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             // 创建认证对象到Spring Security中，将用户信息及权限告诉Spring Security
             // 创建Spring Security认证对象
             UsernamePasswordAuthenticationToken authentication =
-                    // 三个参数：用户名，密码（jwt中不需要），权限列表
-                    new UsernamePasswordAuthenticationToken(username, null, null);
+                    // 三个参数：用户名，密码（jwt中不需要），权限列表(通过)
+                    new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

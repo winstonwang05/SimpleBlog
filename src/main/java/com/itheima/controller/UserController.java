@@ -29,16 +29,28 @@ public class UserController {
     @PostMapping("/register")
     public Result<Long> userRegister(@RequestBody UserRegisterDTO userRegisterDTO) {
         if (userRegisterDTO == null) {
-            return Result.error(400, "请求参数错误");
+            return Result.error(404, "用户不存在");
         }
         String userPassword = userRegisterDTO.getUserPassword();
         String checkPassword = userRegisterDTO.getCheckPassword();
         String userAccount = userRegisterDTO.getUserAccount();
         String planetCode = userRegisterDTO.getPlanetCode();
-        if (StringUtils.isAnyBlank(userPassword, checkPassword, userAccount, planetCode)) {
-            return Result.error(400, "请求参数错误");
+        if (StringUtils.isBlank(userPassword)) {
+            return Result.error(400, "密码不能为空");
+        }
+        if (StringUtils.isBlank(checkPassword)) {
+            return Result.error(400, "确认密码不能为空");
+        }
+        if (StringUtils.isBlank(userAccount)) {
+            return Result.error(400, "账号不能为空");
+        }
+        if (StringUtils.isBlank(planetCode)) {
+            return Result.error(400, "星球编号不能为空");
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
+        if (result <= 0) {
+            return Result.error(400, "注册失败");
+        }
         return Result.success(result);
 
     }
@@ -52,10 +64,16 @@ public class UserController {
         }
         String userPassword = userLoginDTO.getUserPassword();
         String userAccount = userLoginDTO.getUserAccount();
-        if (StringUtils.isAnyBlank(userPassword, userAccount)) {
-            return Result.error(400, "请求参数错误");
+        if (StringUtils.isBlank(userPassword)) {
+            return Result.error(400, "密码不能为空");
+        }
+        if (StringUtils.isBlank(userAccount)) {
+            return Result.error(400, "账号不能为空");
         }
         User user = userService.userLogin(userAccount, userPassword, request);
+        if (user == null) {
+            return Result.error(400, "登录失败");
+        }
         return Result.success(user);
     }
     /**

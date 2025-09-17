@@ -13,15 +13,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-import static com.itheima.constant.UserConstant.ADMIN_ROLE;
+import static com.itheima.constant.UserConstant.ROLE_ADMIN;
 import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 管理员接口
  */
 @RestController
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/admin")
+public class AdminController {
 
     @Autowired
     private UserService userService;
@@ -66,7 +66,7 @@ public class AuthController {
     private boolean isAdmin(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) userObj;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
+        return user != null && user.getUserRole() == ROLE_ADMIN;
     }
 
 }
