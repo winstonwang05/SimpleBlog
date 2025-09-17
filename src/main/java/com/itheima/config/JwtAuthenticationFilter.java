@@ -1,14 +1,18 @@
 package com.itheima.config;
 
+import com.itheima.service.UserService;
 import com.itheima.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,8 +21,13 @@ import java.io.IOException;
 /**
  * Jwt过滤器
  */
+@Component // 让
 // 继承OncePerRequestFilter：确保每个请求只过滤一次
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    // 注入userService用来查询用户的权限信息
+    @Autowired
+    private UserService userService;
+
     // 通过构造方法注入Jwt工具类，用来解析和校验token
     private final JwtUtil jwtUtil;
 
@@ -39,7 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtUtil.getSubjectFromToken(token);
             // 从载荷中获取用户信息
             String username = claims.getSubject();
-            // 创建认证对象，也就是相当于将我们的jwt过滤器注册到Spring Security中，然后再其配置中在原有的过滤器中添加我们自定义的过滤器、
+            /**
+             *  设置用户权限
+             */
+            // 创建认证对象到Spring Security中，将用户信息及权限告诉Spring Security
             // 创建Spring Security认证对象
             UsernamePasswordAuthenticationToken authentication =
                     // 三个参数：用户名，密码（jwt中不需要），权限列表
