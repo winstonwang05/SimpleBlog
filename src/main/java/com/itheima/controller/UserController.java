@@ -11,10 +11,15 @@ import com.itheima.utils.JwtUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -124,6 +129,26 @@ public class UserController {
     public Result<Boolean> userLogout() {
         return Result.success(true); // 删除token由前端删除：localStorage.removeItem("token");
 
+    }
+    /**
+     * 更新用户信息
+     * @param id 用户id
+     * @param username 用户名
+     * @param email 邮箱
+     * @param avatarFile 头像文件
+     * @return 更新后的用户信息
+     * @throws BusinessException 业务异常
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("#id == authentication.principal.id") // 只允许本人修改
+    public ResponseEntity<?> updateUser(
+            @PathVariable Long id,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) MultipartFile avatarFile) throws IOException {
+
+        User updatedUser = userService.updateUserInfo(id, username, email, avatarFile);
+        return ResponseEntity.ok(updatedUser);
     }
 
 

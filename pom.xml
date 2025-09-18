@@ -48,6 +48,12 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+        <!--AliOSS SDK-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.4</version>
+        </dependency>
 
 
         <!-- Spring Security -->

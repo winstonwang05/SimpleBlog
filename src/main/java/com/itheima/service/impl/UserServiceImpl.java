@@ -8,6 +8,7 @@ import com.itheima.pojo.User;
 import com.itheima.service.UserService;
 import com.itheima.mapper.UserMapper;
 import com.itheima.utils.JwtUtil;
+import com.itheima.utils.OssUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -38,7 +42,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserMapper userMapper;
     @Resource
     private PasswordEncoder passwordEncoder;
-
+    @Resource
+    private OssUtil ossUtil;
 
     /**
      *  注册逻辑
@@ -203,6 +208,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.getUserPasswordHash(),
                 authorities
         );
+    }
+    @Override
+    public User updateUserInfo(Long id, String username, String email, MultipartFile avatarFile) {
+        User user = this.getById(id);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在！");
+        }
+
+        if (username != null) {
+            user.setUsername(username);
+        }
+        if (email != null) {
+            user.setEmail(email);
+        }
+
+        // 上传头像到 OSS
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String avatarUrl = null;
+            try {
+                avatarUrl = ossUtil.upload(avatarFile, "avatars/" + id + "/");
+            } catch (IOException e) {
+                throw new RuntimeException("上传 OSS 失败", e);
+            }
+            user.setAvatarUrl(avatarUrl);
+        }
+
+        user.setUpdateTime(LocalDateTime.now());
+        updateById(user); // MyBatis-Plus 更新
+
+        return user;
     }
 }
 

@@ -3,6 +3,7 @@ package com.itheima.service;
 import com.itheima.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
 * @author Winston
@@ -39,4 +40,6 @@ public interface UserService extends IService<User> {
      * 用户登出功能
      */
     int userLogout(HttpServletRequest request);
+
+    User updateUserInfo(Long id, String username, String email, MultipartFile avatarFile);
 }
