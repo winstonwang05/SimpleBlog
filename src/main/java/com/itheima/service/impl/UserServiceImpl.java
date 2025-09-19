@@ -107,11 +107,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      *
      * @param userAccount 用户输入的账号
      * @param userPassword 用户输入的密码
-     * @param request session
      * @return 用户脱敏信息
      */
     @Override
-    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+    public User userLogin(String userAccount, String userPassword) {
         // 校验账号和密码是否合法
         // 非空判断
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
@@ -166,7 +165,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         safetyUser.setPhone(user.getPhone());
         safetyUser.setUserRole(user.getUserRole());
         safetyUser.setEmail(user.getEmail());
-        safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setCreateTime(user.getCreateTime());
         return safetyUser;
     }
@@ -191,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getUserRole()));
         // 返回 Spring Security User 对象
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
+                String.valueOf(user.getUserId()), // 返回的是userId属性
                 user.getUserPasswordHash(),
                 authorities
         );

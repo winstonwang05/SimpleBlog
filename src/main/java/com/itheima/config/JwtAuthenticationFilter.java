@@ -57,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 创建Spring Security认证对象
             UsernamePasswordAuthenticationToken authentication =
                     // 三个参数：用户名，密码（jwt中不需要），权限列表(通过)
+                    // getUsername是总称，我们在实现类用的是userId，但是这里并没有用getUsername方法，这里只是获取用户权限信息
                     new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

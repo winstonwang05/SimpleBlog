@@ -25,10 +25,9 @@ public interface UserService extends IService<User> {
      * 登录逻辑
      * @param userAccount 用户输入的账号
      * @param userPassword 用户输入的密码
-     * @param request session
      * @return 脱敏后的用户信息
      */
-    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    User userLogin(String userAccount, String userPassword);
 
     /**
      * 用户脱敏

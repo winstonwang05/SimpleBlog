@@ -82,7 +82,7 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
         String catheJson = stringRedisTemplate.opsForValue().get(key);
         if (StringUtils.hasText(catheJson)) {
             // 先将Json序列化为PageResult
-            PageResult<User> userPageResult = JSON.parseObject(catheJson, new TypeReference<PageResult<User>>() {
+            PageResult<User> userPageResult = JSON.parseObject(catheJson, new TypeReference<>() {
             });
             // 将PageResult转化为Page对象
             Page<User> userPage = new Page<>();
@@ -161,7 +161,6 @@ public class AdminServiceImpl extends ServiceImpl<UserMapper, User> implements A
         safetyUser.setPhone(user.getPhone());
         safetyUser.setUserRole(user.getUserRole());
         safetyUser.setEmail(user.getEmail());
-        safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setCreateTime(user.getCreateTime());
         return safetyUser;
     }

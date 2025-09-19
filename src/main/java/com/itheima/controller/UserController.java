@@ -47,7 +47,6 @@ public class UserController {
         String userPassword = userRegisterDTO.getUserPassword();
         String checkPassword = userRegisterDTO.getCheckPassword();
         String userAccount = userRegisterDTO.getUserAccount();
-        String planetCode = userRegisterDTO.getPlanetCode();
         if (StringUtils.isBlank(userPassword)) {
             return Result.error(400, "密码不能为空");
         }
@@ -68,7 +67,7 @@ public class UserController {
      * 登录接口
      */
     @PostMapping("/login")
-    public Result<String> userLogin(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+    public Result<String> userLogin(@RequestBody UserLoginDTO userLoginDTO) {
         if (userLoginDTO == null) {
             return Result.error(400, "请求参数错误");
         }
@@ -80,7 +79,7 @@ public class UserController {
         if (StringUtils.isBlank(userAccount)) {
             return Result.error(400, "账号不能为空");
         }
-        User user = userService.userLogin(userAccount, userPassword, request);
+        User user = userService.userLogin(userAccount, userPassword);
         if (user == null) {
             return Result.error(400, "登录失败");
         }
@@ -109,7 +108,8 @@ public class UserController {
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal(); // 认证（Authentication） 和 授权（Authorization）
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", userDetails.getUsername());
+        // 我们在UserServiceImpL中loadUserByUsername重写方法最后设置返回的是userId，所以下面调用就是得到的是userId属性
+        queryWrapper.eq("userId", userDetails.getUsername());
         User user = userService.getOne(queryWrapper);
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
