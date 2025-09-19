@@ -73,13 +73,10 @@ public class User {
 
         /**
          * 用户权限
+         * 普通用户-'ROLE_USER'
+         * 管理员-'ROLE_ADMIN'
          */
-        private Integer userRole;
-
-        /**
-         * 星球编号
-         */
-        private String planetCode;
+        private String userRole;
 
         /**
          * 加密后的密码串

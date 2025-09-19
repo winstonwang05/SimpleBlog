@@ -4,15 +4,17 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.common.ErrorCode;
 import com.itheima.exception.BusinessException;
+
 import com.itheima.pojo.User;
 import com.itheima.service.UserService;
 import com.itheima.mapper.UserMapper;
-import com.itheima.utils.JwtUtil;
+
 import com.itheima.utils.OssUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,12 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
+import static com.itheima.constant.RedisConstant.USER_PAGE_KEY;
+import static com.itheima.constant.RedisConstant.USER_SINGLE_KEY;
+
 
 /**
 * @author Winston
@@ -44,6 +49,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private PasswordEncoder passwordEncoder;
     @Resource
     private OssUtil ossUtil;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      *  注册逻辑
@@ -53,9 +60,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 新用户id
      */
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 非空判断
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)) {
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号长度
@@ -64,10 +71,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 判断登录密码和校验密码长度
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // 判断星球编号是否合规
-        if (planetCode.length() > 5) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断账号是否合规
@@ -86,19 +89,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 星球编号不能重复（唯一性）
-        QueryWrapper<User> queryWrapperValue = new QueryWrapper<>();
-        queryWrapperValue.eq("planetCode", planetCode);
-        if (userMapper.selectCount(queryWrapperValue) > 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
         // 密码加密（argon2）
         String encryptPassword = passwordEncoder.hashPassword(userPassword);
         // 向数据库插入用户数据
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPasswordHash(encryptPassword);
-        user.setPlanetCode(planetCode);
         boolean result = this.save(user);
         if (!result) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -170,17 +166,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         safetyUser.setPhone(user.getPhone());
         safetyUser.setUserRole(user.getUserRole());
         safetyUser.setEmail(user.getEmail());
-        safetyUser.setPlanetCode(user.getPlanetCode());
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setCreateTime(user.getCreateTime());
         return safetyUser;
-    }
-
-    @Override
-    public int userLogout(HttpServletRequest request) {
-        // 移除登陆态（session）
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
-        return 1;
     }
 
     /**
@@ -199,9 +187,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 用户不存在
             throw new BusinessException(404, "用户不存在！");
         }
-        // 将Role信息封装 0-用户 ，1-管理员
-        String roleName = user.getUserRole() == 1 ? "ROLE_ADMIN" : "ROLE_USER";
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleName));
+
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getUserRole()));
         // 返回 Spring Security User 对象
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -209,6 +196,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 authorities
         );
     }
+
+    /**
+     * 修改用户信息
+     * @param id 用户id
+     * @param username 用户名
+     * @param email 邮箱信息
+     * @param avatarFile 头像文件
+     * @return 返回用户修改后的信息
+     */
     @Override
     public User updateUserInfo(Long id, String username, String email, MultipartFile avatarFile) {
         User user = this.getById(id);
@@ -235,10 +231,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         user.setUpdateTime(LocalDateTime.now());
-        updateById(user); // MyBatis-Plus 更新
+        boolean updateSuccess = updateById(user);// MyBatis-Plus 更新
+        // 如果用户更新成功需要删除redis缓存，保证数据的一致性
+        String singleUserKey = USER_SINGLE_KEY + user.getId();
+        String pageUserKey = USER_PAGE_KEY + "*";
+        if (updateSuccess) {
+            // 删除单个用户缓存
+            stringRedisTemplate.delete(singleUserKey);
+            // 删除分页查询缓存
+            Set<String> keys = stringRedisTemplate.keys(pageUserKey);
+            if (keys != null && !keys.isEmpty()) {
+                stringRedisTemplate.delete(keys);
+            }
+        }
 
         return user;
     }
+
 }
 
 

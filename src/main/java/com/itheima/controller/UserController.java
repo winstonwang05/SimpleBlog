@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户接口
@@ -29,6 +28,7 @@ import static com.itheima.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/api/users")
+@PreAuthorize("hasRole('USER')")
 public class UserController {
     // 注入Jwt工具类
     @Resource
@@ -57,10 +57,7 @@ public class UserController {
         if (StringUtils.isBlank(userAccount)) {
             return Result.error(400, "账号不能为空");
         }
-        if (StringUtils.isBlank(planetCode)) {
-            return Result.error(400, "星球编号不能为空");
-        }
-        long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
+        long result = userService.userRegister(userAccount, userPassword, checkPassword);
         if (result <= 0) {
             return Result.error(400, "注册失败");
         }

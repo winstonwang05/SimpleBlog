@@ -7,7 +7,9 @@ import com.itheima.service.UserService;
 import com.itheima.service.impl.PasswordEncoder;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ class UserCenterApplicationTests {
     private UserService userService;
     @Resource
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Test
     void contextLoads() {
         String rawPassword = "123456";
@@ -25,6 +29,11 @@ class UserCenterApplicationTests {
         boolean result = passwordEncoder.verifyPassword(rawPassword, hash);
         System.out.println(result);
 
+    }
+    @Test
+    void test1() {
+        String key = "HELLO:" ;
+        stringRedisTemplate.delete(key);
     }
 
 
