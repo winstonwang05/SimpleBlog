@@ -67,9 +67,9 @@ public class AdminController {
      * @param id 用户id
      * @return 但会单个用户信息
      */
-    @GetMapping
-    public User getUserById(@PathVariable Long id) {
-        return adminService.getUserById(id);
+    @GetMapping("/{id}")
+    public Result<User> getUserById(@PathVariable Long id) {
+        return Result.success(adminService.getUserById(id));
     }
 
 }
