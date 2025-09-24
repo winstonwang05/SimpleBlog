@@ -1,4 +1,4 @@
-# UserCenter 项目
+# SimpleBlog 项目
 
 这是一个基于 **Spring Boot + MyBatis-Plus + Spring Security + Redis** 的后端练手项目，实现了用户注册、登录、权限管理，以及博客的增删改查功能。
 
