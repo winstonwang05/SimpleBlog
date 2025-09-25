@@ -50,5 +50,6 @@
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/winstonwang05/UserCenter.git
-cd UserCenter
+git clone https://github.com/winstonwang05/SimpleBlog.git
+cd SimpleBlog
+
